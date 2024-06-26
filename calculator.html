@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>calculator</title>
+    <style>body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    .container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        .calculator{
+            width: 320px;
+            background-color:#fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            .brand{
+               
+                background-color:#583845;
+                color:#000;
+                display: flex;
+                 align-items: center;
+                 justify-content: center;
+                height: 50px;
+                
+                a{
+                    text-decoration: none;
+                    border-radius:10px;
+                    padding: 10px;
+                    color: #d38280;
+                    background-color: #222C35;
+                    font-family:'Courier New', Courier, monospace;
+                }
+            }
+            .display-screen{
+                background-color:#222C35;
+                color: #fff;
+                font-size: 32px;
+                padding: 40px 10px;
+                text-align: right;
+                /* border-top-left-radius: 10px;
+                border-top-right-radius: 10px; */
+            }
+            .buttons-block{
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+                padding: 7px 0;
+                justify-content: center;
+                background-color: #24313A;
+            }
+            .button{
+                padding: 20px;
+                font-size: 18px;
+                flex:0 0 23% ;
+                cursor: pointer;
+                border-radius: 10px;
+                color: #fff;
+                background-color:#24313A;
+                
+                border: none;
+            &:hover{
+                background-color:#FF5E5B;
+                color: #000;
+            }  
+            .button:active {
+                background-color: #ccc;
+            } 
+            }
+            .equals{
+                background-color: #FF5E5B;
+                color: #fff !important;
+                padding: 20px 65px;
+                font-size: 24px;
+                &:hover{
+                    background-color:#ddddddab;
+                }
+            }
+            
+            .operator{
+                color: #FF5E5B;
+            }
+        }
+    
+    }
+    }
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <div class="calculator">
+        <div class="brand"><a href="/">Yab calculator</a></div>
+        <div class="display-screen">0</div>
+        <div class="buttons-block">
+            <button class="button operator">Back</button>
+            <button class="button operator">%</button>
+            <button class="button operator">/</button>
+            <button class="button operator">C</button>
+            <button class="button">7</button>
+            <button class="button">8</button>
+            <button class="button">9</button>
+            <button class="button operator">*</button>
+            
+            <button class="button">4</button>
+            <button class="button">5</button>
+            <button class="button">6</button>
+            <button class="button operator">-</button>
+          
+            <button class="button">1</button>
+            <button class="button">2</button>
+            <button class="button">3</button>
+            <button class="button operator">+</button> 
+            <button class="button">.</button>
+            <button class="button">0</button>
+          
+            <button class="button operator equals">=</button>
+        
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const display = document.querySelector('.display-screen'); // Selects the display screen to show the calculator's output.
+    const buttons = document.querySelectorAll('.button'); // Selects all buttons to add event listeners to each calculator button.
+
+    let currentInput = '0'; // Stores the current number being entered or displayed.
+    let expression = ''; // Keeps track of the entire expression being entered.
+    let previousInput = null; // Stores the previous number input before an operator is pressed.
+    let operator = null; // Stores the last operator pressed.
+
+    updateDisplay(); // Initialize display with '0'.
+
+    // Iterate over each button and add a click event listener. When a button is clicked, it captures the button's text content.
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            const value = button.textContent;
+
+            if (button.classList.contains('operator')) {
+                handleOperator(value);
+                // If the clicked button has the class operator, it calls handleOperator(value).
+            } else {
+                handleNumber(value);
+                // If it's a number, it calls handleNumber(value).
+            }
+            updateDisplay();
+            // After handling the button click, it updates the display.
+        });
+    });
+
+    // handleNumber updates currentInput with the number clicked.
+    function handleNumber(value) {
+        if (currentInput === '0' || currentInput === 'Error') {
+            currentInput = value;
+        } else {
+            currentInput += value;
+        }
+        expression += value;
+        // It also updates expression by appending the new number.
+    }
+
+    function handleOperator(value) {
+        // If C is pressed, it clears all inputs and resets everything.
+        if (value === 'C') {
+            currentInput = '0';
+            expression = '';
+            previousInput = null;
+            operator = null;
+        } 
+        // If . is pressed and it's not already in currentInput, it adds it.
+        else if (value === '.') {
+            if (!currentInput.includes('.')) {
+                currentInput += '.';
+                expression += '.';
+            }
+        } 
+        // If = is pressed and an operator and previous input exist, it calculates the result.
+        else if (value === '=') {
+            if (operator && previousInput !== null) {
+                currentInput = calculate(previousInput, currentInput, operator);
+                operator = null;
+                previousInput = null;
+                expression = currentInput;
+            }
+        }
+        // If Back is pressed, it removes the last character from the expression and current input.
+        else if (value === 'Back') {
+            if (expression.length > 0) {
+                expression = expression.slice(0, -1);
+                currentInput = currentInput.slice(0, -1);
+                if (currentInput === '') {
+                    currentInput = '0';
+                }
+            }
+        } 
+        // For other operators (+, -, *, /), it updates the expression, stores the current input as previousInput, and sets the operator. If there was a previous operator, it first calculates the intermediate result.
+        else {
+            if (operator && previousInput !== null) {
+                currentInput = calculate(previousInput, currentInput, operator);
+                expression = currentInput;
+            }
+            operator = value;
+            previousInput = currentInput;
+            currentInput = '0';
+            expression += value;
+        }
+    }
+
+    function calculate(a, b, operator) {
+        const numA = parseFloat(a);
+        const numB = parseFloat(b);
+
+        switch (operator) {
+            case '+':
+                return (numA + numB).toString();
+            case '-':
+                return (numA - numB).toString();
+            case '*':
+                return (numA * numB).toString();
+            case '/':
+                return numB !== 0 ? (numA / numB).toString() : 'Error';
+            default:
+                return 'Error';
+        }
+    }
+
+    // updateDisplay updates the calculator's display with the current expression. If expression is empty, it displays 0.
+    function updateDisplay() {
+        display.textContent = expression === '' ? '0' : expression;
+    }
+});
+
+</script>
+</body>
